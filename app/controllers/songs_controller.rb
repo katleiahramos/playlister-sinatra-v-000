@@ -12,21 +12,14 @@ class SongsController < ApplicationController
   end
 
   post '/songs' do
-    @song = Song.create(params[:song])
-    params[:genres].each do |genre|
-      @song.genres << Genre.find_by(genre[:id])
-    end
+    @song = Song.create(:name => params["Name"])
+   @song.artist = Artist.find_or_create_by(:name => params["Artist Name"])
+   @song.genre_ids = params[:genres]
+   @song.save
 
-    if !params["artist"]["name"].empty? && !Artist.find_by(:name => params["artist"]["name"])
-      @song.artist = Artist.create(name: params["artist"]["name"])
-    elsif Artist.find_by(:name => params["artist"]["name"])
-      @song.artist = Artist.find_by(:name => params["artist"]["name"])
-    end
+   flash[:message] = "Successfully created song."
 
-    @song.save
-
-    flash[:message] = "Successfully created song."
-    redirect to("/songs/#{@song.slug}")
+   redirect("/songs/#{@song.slug}")
   end
 
   get '/songs/:slug/edit' do
